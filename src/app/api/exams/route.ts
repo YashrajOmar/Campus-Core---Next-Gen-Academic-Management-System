@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAuth, requireRole } from "@/lib/rbac";
 
 const prisma = new PrismaClient();
 
-// GET /api/exams — all authenticated users
+// GET /api/exams - all authenticated users
 export async function GET(request: Request) {
   const { error } = await requireAuth();
   if (error) return error;
@@ -24,7 +24,7 @@ export async function GET(request: Request) {
   return NextResponse.json(exams);
 }
 
-// POST /api/exams — Admin + Coordinator
+// POST /api/exams - Admin + Coordinator
 export async function POST(request: Request) {
   const { error } = await requireRole(["ADMIN", "COORDINATOR", "HOD", "FACULTY"]);
   if (error) return error;
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
   return NextResponse.json(exam, { status: 201 });
 }
 
-// DELETE /api/exams — Admin only
+// DELETE /api/exams - Admin only
 export async function DELETE(request: Request) {
   const { error } = await requireRole(["ADMIN"]);
   if (error) return error;
@@ -61,3 +61,4 @@ export async function DELETE(request: Request) {
   await prisma.examSchedule.delete({ where: { id } });
   return NextResponse.json({ message: "Exam schedule removed." });
 }
+

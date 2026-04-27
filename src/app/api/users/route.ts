@@ -1,10 +1,10 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireRole } from "@/lib/rbac";
 
 const prisma = new PrismaClient();
 
-// GET /api/users â€” Admin: all users | Coordinator: their dept only
+// GET /api/users - Admin: all users | Coordinator: their dept only
 export async function GET(request: Request) {
   const { user, error } = await requireRole(["ADMIN", "COORDINATOR"]);
   if (error) return error;
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       where.department = coordinatorUser.department;
     }
     // Coordinators cannot see Admin accounts
-    where.role = { notIn: ["ADMIN"] };
+    if (role) { where.role = role; } else { where.role = { notIn: ["ADMIN"] }; }
   } else {
     // Admin can filter optionally
     if (department) where.department = department;
@@ -44,10 +44,30 @@ export async function GET(request: Request) {
     orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json(users);
+  // Manually fetch parent students for Parent users to avoid relation crashes
+  const enrichedUsers = await Promise.all(users.map(async (u) => {
+    if (u.role === "PARENT") {
+      const parentProfile = await prisma.parent.findUnique({
+        where: { userId: u.id },
+        include: {
+          students: {
+            include: {
+              student: {
+                include: { user: { select: { name: true } } }
+              }
+            }
+          }
+        }
+      });
+      return { ...u, parentProfile };
+    }
+    return u;
+  }));
+
+  return NextResponse.json(enrichedUsers);
 }
 
-// PATCH /api/users â€” approve or update a user
+// PATCH /api/users - approve or update a user
 export async function PATCH(request: Request) {
   const { user, error } = await requireRole(["ADMIN", "COORDINATOR"]);
   if (error) return error;
@@ -78,7 +98,7 @@ export async function PATCH(request: Request) {
   return NextResponse.json(updated);
 }
 
-// DELETE /api/users â€” Admin only
+// DELETE /api/users - Admin only
 export async function DELETE(request: Request) {
   const { error } = await requireRole(["ADMIN"]);
   if (error) return error;
@@ -89,4 +109,6 @@ export async function DELETE(request: Request) {
   await prisma.user.delete({ where: { id: userId } });
   return NextResponse.json({ message: "User deleted." });
 }
+
+
 

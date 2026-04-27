@@ -1,9 +1,10 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Modal, ModalTitle, ModalError, ModalField, ModalRow, ModalHalf, ModalInput, ModalSelect, ModalSubmit } from "@/components/Modal";
 
 type Exam = { id:string; courseCode:string; courseName:string; examDate:string; startTime:string; room:string|null; department:string; semester:number; type:string; };
+type Course = { id:string; courseCode:string; courseName:string; department:string; semester:number; };
 const TYPES = ["MIDTERM","FINAL","QUIZ"];
 const TYPE_STYLE: Record<string,string> = { MIDTERM:"text-blue-400 bg-blue-500/10 border-blue-500/20", FINAL:"text-red-400 bg-red-500/10 border-red-500/20", QUIZ:"text-green-400 bg-green-500/10 border-green-500/20" };
 const BLANK = { courseCode:"", courseName:"", examDate:"", startTime:"09:00", room:"", department:"", semester:"1", type:"MIDTERM" };
@@ -15,6 +16,7 @@ export default function ExamsPage() {
   const canDelete = ["ADMIN","HOD"].includes(role);
 
   const [exams, setExams] = useState<Exam[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState("");
@@ -28,8 +30,28 @@ export default function ExamsPage() {
 
   async function load() {
     setLoading(true); setErr("");
-    try { const r = await fetch("/api/exams"); if (!r.ok) throw new Error("Failed to load"); setExams(await r.json()); }
+    try {
+      const [er, cr] = await Promise.all([fetch("/api/exams"), fetch("/api/courses")]);
+      if (!er.ok) throw new Error("Failed to load exams");
+      setExams(await er.json());
+      if (cr.ok) setCourses(await cr.json());
+    }
     catch (e:any) { setErr(e.message); } finally { setLoading(false); }
+  }
+
+  function handleCourseChange(code: string) {
+    const course = courses.find(c => c.courseCode === code);
+    if (course) {
+      setF(p => ({
+        ...p,
+        courseCode: course.courseCode,
+        courseName: course.courseName,
+        department: course.department,
+        semester: String(course.semester)
+      }));
+    } else {
+      setF(p => ({ ...p, courseCode: code }));
+    }
   }
 
   function openAdd() { setEditing(null); setF({...BLANK}); setFerr(""); setShow(true); }
@@ -127,19 +149,26 @@ export default function ExamsPage() {
           <form onSubmit={submit}>
             <ModalError msg={ferr} />
             <ModalRow>
-              <ModalHalf><ModalField label="Course Code"><ModalInput value={f.courseCode} onChange={e=>setF(p=>({...p,courseCode:e.target.value}))} placeholder="CS301" /></ModalField></ModalHalf>
+              <ModalHalf>
+                <ModalField label="Course Code">
+                  <ModalSelect value={f.courseCode} onChange={e => handleCourseChange(e.target.value)}>
+                    <option value="">-- Select Course --</option>
+                    {courses.map(c => <option key={c.id} value={c.courseCode}>{c.courseCode}</option>)}
+                  </ModalSelect>
+                </ModalField>
+              </ModalHalf>
               <ModalHalf><ModalField label="Type"><ModalSelect value={f.type} onChange={e=>setF(p=>({...p,type:e.target.value}))}>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</ModalSelect></ModalField></ModalHalf>
             </ModalRow>
-            <ModalField label="Course Name"><ModalInput value={f.courseName} onChange={e=>setF(p=>({...p,courseName:e.target.value}))} placeholder="Data Structures" /></ModalField>
+            <ModalField label="Course Name"><ModalInput value={f.courseName} readOnly placeholder="Auto-filled" /></ModalField>
             <ModalRow>
               <ModalHalf><ModalField label="Exam Date"><ModalInput type="date" value={f.examDate} onChange={e=>setF(p=>({...p,examDate:e.target.value}))} /></ModalField></ModalHalf>
               <ModalHalf><ModalField label="Start Time"><ModalInput type="time" value={f.startTime} onChange={e=>setF(p=>({...p,startTime:e.target.value}))} /></ModalField></ModalHalf>
             </ModalRow>
             <ModalRow>
               <ModalHalf><ModalField label="Venue / Room"><ModalInput value={f.room} onChange={e=>setF(p=>({...p,room:e.target.value}))} placeholder="Hall A" /></ModalField></ModalHalf>
-              <ModalHalf><ModalField label="Department"><ModalInput value={f.department} onChange={e=>setF(p=>({...p,department:e.target.value}))} placeholder="CS" /></ModalField></ModalHalf>
+              <ModalHalf><ModalField label="Department"><ModalInput value={f.department} readOnly placeholder="Auto-filled" /></ModalField></ModalHalf>
             </ModalRow>
-            <ModalField label="Semester"><ModalInput type="number" min="1" max="8" value={f.semester} onChange={e=>setF(p=>({...p,semester:e.target.value}))} /></ModalField>
+            <ModalField label="Semester"><ModalInput type="number" min="1" max="8" value={f.semester} readOnly placeholder="Auto-filled" /></ModalField>
             <ModalSubmit loading={saving} label={editing?"Save Changes":"Schedule Exam"} />
           </form>
         </Modal>

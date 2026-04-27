@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Modal, ModalTitle, ModalError, ModalField, ModalRow, ModalHalf, ModalInput, ModalSelect, ModalSubmit } from "@/components/Modal";
@@ -15,6 +15,7 @@ export default function MarksPage() {
   const [marks, setMarks] = useState<Mark[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
+  const [allEnrollments, setAllEnrollments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
   const [show, setShow] = useState(false);
@@ -32,14 +33,13 @@ export default function MarksPage() {
       const marksData = await mr.json();
       setMarks(marksData);
       if (cr.ok) setCourses(await cr.json());
-      // Load students for faculty
+      // Load enrollments for filtering students
       if (canUpload) {
         try {
-          const sr = await fetch("/api/users?role=STUDENT");
-          if (sr.ok) {
-            const usersData = await sr.json();
-            // Map users to student-like objects
-            setStudents(usersData.map((u: any) => ({ id: u.id, enrollmentNumber: u.email, user: { name: u.name || u.email } })));
+          const er = await fetch("/api/enrollments");
+          if (er.ok) {
+            const enrollmentsData = await er.json();
+            setAllEnrollments(enrollmentsData.filter((e: any) => e.status === "APPROVED"));
           }
         } catch {}
       }
@@ -47,8 +47,21 @@ export default function MarksPage() {
   }
 
   function openAdd() {
-    setF({ studentId:"", courseId:courses[0]?.id||"", marksObtained:"", totalMarks:"100", topic:"", status:"DRAFT" });
+    const firstCourseId = courses[0]?.id || "";
+    setF({ studentId: "", courseId: firstCourseId, marksObtained: "", totalMarks: "100", topic: "", status: "DRAFT" });
+    updateStudentsList(firstCourseId);
     setFerr(""); setShow(true);
+  }
+
+  function updateStudentsList(courseId: string) {
+    const enrolled = allEnrollments
+      .filter((e: any) => e.courseId === courseId)
+      .map((e: any) => ({
+        id: e.student.id,
+        enrollmentNumber: e.student.user?.email || "N/A",
+        user: { name: e.student.user?.name || e.student.user?.email || "Unknown" }
+      }));
+    setStudents(enrolled);
   }
 
   async function submit(e: React.FormEvent) {
@@ -132,8 +145,8 @@ export default function MarksPage() {
               <tbody className="text-sm">
                 {marks.map(m => (
                   <tr key={m.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="py-4 font-medium text-white">{m.course?.courseCode || "â€”"}</td>
-                    {canUpload && <td className="py-4 text-foreground/80">{m.student?.user?.name || m.studentId}</td>}
+                    <td className="py-4 font-medium text-white">{m.course?.courseCode || "-"}</td>
+                    {canUpload && <td className="py-4 text-foreground/80">{m.student?.user?.name || m.student?.user?.email || m.studentId}</td>}
                     <td className="py-4 text-foreground/80">{m.topic || "General"}</td>
                     <td className="py-4 text-foreground/80">{m.status === "DRAFT" ? "--" : m.marksObtained}</td>
                     <td className="py-4 text-foreground/80">{m.totalMarks}</td>
@@ -154,9 +167,13 @@ export default function MarksPage() {
           <form onSubmit={submit}>
             <ModalError msg={ferr} />
             <ModalField label="Course">
-              <ModalSelect value={f.courseId} onChange={e => setF(p => ({...p, courseId:e.target.value}))}>
+              <ModalSelect value={f.courseId} onChange={e => {
+                const cid = e.target.value;
+                setF(p => ({...p, courseId: cid, studentId: ""}));
+                updateStudentsList(cid);
+              }}>
                 <option value="">-- Select --</option>
-                {courses.map(c => <option key={c.id} value={c.id}>{c.courseCode} â€” {c.courseName}</option>)}
+                {courses.map(c => <option key={c.id} value={c.id}>{c.courseCode} - {c.courseName}</option>)}
               </ModalSelect>
             </ModalField>
             <ModalField label="Student">
@@ -188,4 +205,6 @@ export default function MarksPage() {
     </div>
   );
 }
+
+
 

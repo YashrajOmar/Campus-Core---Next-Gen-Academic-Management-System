@@ -1,10 +1,10 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAuth, requireRole } from "@/lib/rbac";
 
 const prisma = new PrismaClient();
 
-// GET /api/marks â€” role-filtered
+// GET /api/marks - role-filtered
 export async function GET(request: Request) {
   const { user, error } = await requireAuth();
   if (error) return error;
@@ -21,6 +21,10 @@ export async function GET(request: Request) {
     const profile = await prisma.student.findUnique({ where: { userId: (user as any).id } });
     if (!profile) return NextResponse.json([]);
     where.studentId = profile.id;
+  } else if (role === "PARENT") {
+    const parent = await prisma.parent.findUnique({ where: { userId: (user as any).id }, include: { students: true } });
+    if (!parent || parent.students.length === 0) return NextResponse.json([]);
+    where.studentId = { in: parent.students.map((ps: any) => ps.studentId) };
   } else if (role === "FACULTY") {
     const profile = await prisma.faculty.findUnique({ where: { userId: (user as any).id } });
     if (!profile) return NextResponse.json([]);
@@ -31,7 +35,7 @@ export async function GET(request: Request) {
   const marks = await prisma.mark.findMany({
     where,
     include: {
-      student: { include: { user: { select: { name: true } } } },
+      student: { include: { user: { select: { name: true, email: true } } } },
       course: true,
     },
     orderBy: { id: "desc" },
@@ -41,7 +45,7 @@ export async function GET(request: Request) {
   return NextResponse.json(marks);
 }
 
-// POST /api/marks â€” Faculty + Admin
+// POST /api/marks - Faculty + Admin
 export async function POST(request: Request) {
   const { user, error } = await requireRole(["FACULTY", "ADMIN", "HOD", "COORDINATOR"]);
   if (error) return error;
@@ -62,9 +66,15 @@ export async function POST(request: Request) {
     var facultyIdToUse = faculty.id;
   }
 
+  // Find the actual Student record
+  const studentRecord = await prisma.student.findFirst({ where: { OR: [{ id: studentId }, { userId: studentId }] } });
+  if (!studentRecord) {
+    return NextResponse.json({ error: "Student profile not found for this user." }, { status: 404 });
+  }
+
   const mark = await prisma.mark.create({
     data: {
-      studentId,
+      studentId: studentRecord.id,
       courseId,
       facultyId: facultyIdToUse,
       marksObtained,
@@ -77,7 +87,7 @@ export async function POST(request: Request) {
   return NextResponse.json(mark, { status: 201 });
 }
 
-// PATCH /api/marks â€” update a mark (Faculty + Admin)
+// PATCH /api/marks - update a mark (Faculty + Admin)
 export async function PATCH(request: Request) {
   const { error } = await requireRole(["FACULTY", "ADMIN", "HOD"]);
   if (error) return error;
@@ -88,4 +98,6 @@ export async function PATCH(request: Request) {
   const updated = await prisma.mark.update({ where: { id }, data });
   return NextResponse.json(updated);
 }
+
+
 

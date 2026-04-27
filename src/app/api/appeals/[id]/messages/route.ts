@@ -5,7 +5,8 @@ import { requireAuth, requireRole } from "@/lib/rbac";
 const prisma = new PrismaClient();
 
 // GET /api/appeals/[id]/messages
-export async function GET(_: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, context: any) {
+  const params = await context.params;
   const { error } = await requireAuth();
   if (error) return error;
 
@@ -19,7 +20,8 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
 }
 
 // POST /api/appeals/[id]/messages — any authenticated user (student or staff)
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, context: any) {
+  const params = await context.params;
   const { user, error } = await requireAuth();
   if (error) return error;
 

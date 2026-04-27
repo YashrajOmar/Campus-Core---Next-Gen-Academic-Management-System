@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAuth, requireRole } from "@/lib/rbac";
 import { z } from "zod";
@@ -12,7 +12,7 @@ const noticeSchema = z.object({
   department: z.string().optional().nullable(),
 });
 
-// GET /api/notices — all authenticated users
+// GET /api/notices - all authenticated users
 export async function GET() {
   const { error } = await requireAuth();
   if (error) return error;
@@ -23,7 +23,7 @@ export async function GET() {
   return NextResponse.json(notices);
 }
 
-// POST /api/notices — Admin, HOD, Coordinator
+// POST /api/notices - Admin, HOD, Coordinator
 export async function POST(request: Request) {
   const { user, error } = await requireRole(["ADMIN", "HOD", "COORDINATOR", "FACULTY"]);
   if (error) return error;
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
   }
 }
 
-// DELETE /api/notices/[id] — Admin only (inline handler for simplicity)
+// DELETE /api/notices/[id] - Admin only (inline handler for simplicity)
 export async function DELETE(request: Request) {
   const { error } = await requireRole(["ADMIN"]);
   if (error) return error;
@@ -60,3 +60,4 @@ export async function DELETE(request: Request) {
   await prisma.notice.delete({ where: { id } });
   return NextResponse.json({ message: "Notice deleted." });
 }
+

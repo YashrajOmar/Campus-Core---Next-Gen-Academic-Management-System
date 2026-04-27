@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { Modal, ModalTitle, ModalError, ModalField, ModalRow, ModalHalf, ModalInput, ModalSelect, ModalSubmit } from "@/components/Modal";
@@ -135,7 +135,7 @@ export default function TimetablePage() {
             <ModalField label="Course">
               <ModalSelect value={f.courseId} onChange={e=>setF(p=>({...p,courseId:e.target.value}))}>
                 <option value="">-- Select Course --</option>
-                {courses.map(c=><option key={c.id} value={c.id}>{c.courseCode} — {c.courseName} ({c.department})</option>)}
+                {courses.map(c=><option key={c.id} value={c.id}>{c.courseCode} - {c.courseName} ({c.department})</option>)}
               </ModalSelect>
             </ModalField>
             {selectedCourse && (

@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAuth, requireRole } from "@/lib/rbac";
 
 const prisma = new PrismaClient();
 
-// GET /api/timetable — all authenticated users, filtered by dept/semester
+// GET /api/timetable - all authenticated users, filtered by dept/semester
 export async function GET(request: Request) {
   const { user, error } = await requireAuth();
   if (error) return error;
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   return NextResponse.json(timetables);
 }
 
-// POST /api/timetable — Admin + Coordinator
+// POST /api/timetable - Admin + Coordinator
 export async function POST(request: Request) {
   const { error } = await requireRole(["ADMIN", "COORDINATOR", "HOD", "FACULTY"]);
   if (error) return error;
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
   return NextResponse.json(slot, { status: 201 });
 }
 
-// DELETE /api/timetable — Admin + Coordinator
+// DELETE /api/timetable - Admin + Coordinator
 export async function DELETE(request: Request) {
   const { error } = await requireRole(["ADMIN", "COORDINATOR"]);
   if (error) return error;
@@ -54,3 +54,4 @@ export async function DELETE(request: Request) {
   await prisma.timetable.delete({ where: { id } });
   return NextResponse.json({ message: "Timetable slot removed." });
 }
+

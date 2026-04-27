@@ -18,6 +18,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { data: session } = useSession();
   const [notifOpen, setNotifOpen] = useState(false);
   const [readIds, setReadIds] = useState<number[]>([]);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
 
   const userName = session?.user?.name || "User";
@@ -33,8 +34,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { href: "/dashboard", label: "Overview", roles: ["ANY"] },
     { href: "/dashboard/courses", label: "Courses", roles: ["ADMIN", "HOD", "COORDINATOR", "FACULTY"] },
+    { href: "/dashboard/enrollments", label: "Enrollments", roles: ["ANY"] },
     { href: "/dashboard/timetable", label: "Timetable", roles: ["ANY"] },
-    { href: "/dashboard/attendance", label: "Attendance", roles: ["STUDENT", "PARENT"] },
+    { href: "/dashboard/attendance", label: "Attendance", roles: ["ANY"] },
     { href: "/dashboard/marks", label: "Internal Marks", roles: ["ANY"] },
     { href: "/dashboard/exams", label: "Exam Schedule", roles: ["ANY"] },
     { href: "/dashboard/appeals", label: "Appeals Portal", roles: ["ANY"] },
@@ -68,13 +70,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="flex h-screen overflow-hidden bg-background">
       
       {/* Sidebar */}
-      <aside className="w-64 glass-panel border-r border-white/10 hidden md:flex flex-col z-20 m-4 rounded-3xl animate-slide-up">
-        <div className="h-20 flex items-center px-8 border-b border-white/5">
+      <aside className={`glass-panel border-r border-white/10 hidden md:flex flex-col z-20 m-4 rounded-3xl animate-slide-up transition-all duration-300 ease-in-out ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
+        <div className={`h-20 flex items-center border-b border-white/5 transition-all duration-300 ${sidebarCollapsed ? 'justify-center px-0' : 'px-8'}`}>
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/30 flex-shrink-0">
               <span className="text-white font-bold text-sm">C</span>
             </div>
-            <span className="text-lg font-bold tracking-tight text-white animate-glow">CampusCore</span>
+            {!sidebarCollapsed && <span className="text-lg font-bold tracking-tight text-white animate-glow whitespace-nowrap">CampusCore</span>}
           </Link>
         </div>
 
@@ -83,25 +85,27 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             const isActive = pathname === item.href;
             return (
               <Link key={item.href} href={item.href}
+                title={sidebarCollapsed ? item.label : ""}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                   isActive
                   ? "bg-primary/15 text-primary border border-primary/20 shadow-[0_0_15px_rgba(139,92,246,0.1)]"
                   : "text-foreground/70 hover:bg-white/5 hover:text-white border border-transparent"
-                }`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-primary animate-pulse' : 'bg-transparent'}`} />
-                <span className="font-medium text-sm">{item.label}</span>
+                } ${sidebarCollapsed ? 'justify-center px-0' : ''}`}>
+                <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${isActive ? 'bg-primary animate-pulse' : 'bg-transparent'}`} />
+                {!sidebarCollapsed && <span className="font-medium text-sm whitespace-nowrap">{item.label}</span>}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/5">
+        <div className={`p-4 border-t border-white/5 ${sidebarCollapsed ? 'flex justify-center' : ''}`}>
           <button onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-400 group rounded-xl hover:bg-red-400/10 transition-colors w-full">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform">
+            title={sidebarCollapsed ? "Logout" : ""}
+            className={`flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-400 group rounded-xl hover:bg-red-400/10 transition-colors ${sidebarCollapsed ? 'w-auto' : 'w-full'}`}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-x-1 transition-transform flex-shrink-0">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>
             </svg>
-            Logout
+            {!sidebarCollapsed && <span className="whitespace-nowrap">Logout</span>}
           </button>
         </div>
       </aside>
@@ -111,6 +115,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Top Navbar */}
         <header className="h-20 glass-panel border-b border-white/10 flex items-center justify-between px-8 z-10 m-4 mt-4 ml-0 rounded-3xl animate-slide-up delay-100">
           <div className="flex items-center gap-4">
+            <button onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="p-2 hover:bg-white/5 rounded-lg text-foreground/70 transition-colors mr-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={`transition-transform duration-300 ${sidebarCollapsed ? 'rotate-180' : ''}`}>
+                <path d="M15 18l-6-6 6-6"/>
+              </svg>
+            </button>
             <h1 className="text-xl font-semibold text-white capitalize">
               {pathname === "/dashboard" ? "Overview" : pathname.split("/dashboard/")[1] || "Dashboard"}
             </h1>

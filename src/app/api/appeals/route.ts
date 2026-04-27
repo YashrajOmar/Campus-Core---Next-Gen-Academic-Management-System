@@ -4,7 +4,7 @@ import { requireAuth, requireRole } from "@/lib/rbac";
 
 const prisma = new PrismaClient();
 
-// GET /api/appeals â€” all authenticated users (filtered by role)
+// GET /api/appeals - all authenticated users (filtered by role)
 export async function GET(request: Request) {
   const { user, error } = await requireAuth();
   if (error) return error;
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
   return NextResponse.json(appeals);
 }
 
-// POST /api/appeals â€” Students only
+// POST /api/appeals - Students only
 export async function POST(request: Request) {
   const { user, error } = await requireRole(["STUDENT"]);
   if (error) return error;
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
   return NextResponse.json(appeal, { status: 201 });
 }
 
-// PATCH /api/appeals â€” Staff can escalate / resolve / reject
+// PATCH /api/appeals - Staff can escalate / resolve / reject
 export async function PATCH(request: Request) {
   const { error } = await requireRole(["ADMIN", "HOD", "COORDINATOR", "FACULTY"]);
   if (error) return error;
@@ -113,4 +113,5 @@ export async function PATCH(request: Request) {
 
   return NextResponse.json(updated);
 }
+
 

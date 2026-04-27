@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CampusCore — College Academic Management",
+  title: "CampusCore - College Academic Management",
   description: "A unified platform for attendance, marks, exams, appeals, and campus communication.",
 };
 
@@ -34,3 +34,4 @@ export default function RootLayout({
     </html>
   );
 }
+
