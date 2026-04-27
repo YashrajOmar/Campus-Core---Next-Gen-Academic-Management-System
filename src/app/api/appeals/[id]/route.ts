@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAuth } from "@/lib/rbac";
 
@@ -6,10 +6,10 @@ const prisma = new PrismaClient();
 
 // PATCH /api/appeals/[id]
 export async function PATCH(
-  request: Request,
-  context: any
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const params = await context.params;
+  const { id } = await params;
   const { user, error } = await requireAuth();
   if (error) return error;
 

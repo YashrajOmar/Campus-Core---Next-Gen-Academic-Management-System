@@ -1,17 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireAuth, requireRole } from "@/lib/rbac";
 
 const prisma = new PrismaClient();
 
 // GET /api/appeals/[id]/messages
-export async function GET(request: Request, context: any) {
-  const params = await context.params;
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { error } = await requireAuth();
   if (error) return error;
 
   const messages = await prisma.appealMessage.findMany({
-    where: { appealId: params.id },
+    where: { appealId: id },
     orderBy: { createdAt: "asc" },
     include: { author: { select: { name: true, role: true } } },
   });
@@ -20,8 +20,8 @@ export async function GET(request: Request, context: any) {
 }
 
 // POST /api/appeals/[id]/messages — any authenticated user (student or staff)
-export async function POST(request: Request, context: any) {
-  const params = await context.params;
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { user, error } = await requireAuth();
   if (error) return error;
 
@@ -30,7 +30,7 @@ export async function POST(request: Request, context: any) {
     return NextResponse.json({ error: "Message text cannot be empty." }, { status: 400 });
   }
 
-  const appeal = await prisma.appeal.findUnique({ where: { id: params.id } });
+  const appeal = await prisma.appeal.findUnique({ where: { id } });
   if (!appeal) return NextResponse.json({ error: "Appeal not found." }, { status: 404 });
 
   if (appeal.status === "RESOLVED" || appeal.status === "REJECTED") {
@@ -39,7 +39,7 @@ export async function POST(request: Request, context: any) {
 
   const message = await prisma.appealMessage.create({
     data: {
-      appealId: params.id,
+      appealId: id,
       authorId: (user as any).id,
       authorRole: (user as any).role,
       text: text.trim(),

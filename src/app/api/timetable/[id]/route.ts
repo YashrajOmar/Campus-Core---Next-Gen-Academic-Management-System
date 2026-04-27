@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { requireRole } from "@/lib/rbac";
 
 const prisma = new PrismaClient();
 
 // PATCH /api/timetable/[id] — Admin + Coordinator + HOD + Faculty
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireRole(["ADMIN", "COORDINATOR", "HOD", "FACULTY"]);
   if (error) return error;
 
@@ -29,7 +29,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 // DELETE /api/timetable/[id] — Admin + Coordinator + HOD
-export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireRole(["ADMIN", "COORDINATOR", "HOD"]);
   if (error) return error;
 
