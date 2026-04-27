@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">CampusCore</string>
+    <string name="title_activity_main">CampusCore</string>
+    <string name="package_name">com.campuscore.app</string>
+    <string name="custom_url_scheme">com.campuscore.app</string>
+</resources>

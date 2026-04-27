@@ -5,14 +5,15 @@ import { requireRole } from "@/lib/rbac";
 const prisma = new PrismaClient();
 
 // PATCH /api/courses/[id] - Admin + Coordinator + HOD + Faculty
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireRole(["ADMIN", "COORDINATOR", "HOD", "FACULTY"]);
   if (error) return error;
 
+  const { id } = await params;
   const body = await request.json();
   try {
     const updated = await prisma.course.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(body.courseCode && { courseCode: body.courseCode }),
         ...(body.courseName && { courseName: body.courseName }),
@@ -29,12 +30,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 // DELETE /api/courses/[id] - Admin + HOD only
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireRole(["ADMIN", "HOD"]);
   if (error) return error;
 
+  const { id } = await params;
   try {
-    await prisma.course.delete({ where: { id: params.id } });
+    await prisma.course.delete({ where: { id } });
     return NextResponse.json({ message: "Course deleted." });
   } catch {
     return NextResponse.json({ error: "Failed to delete course." }, { status: 500 });

@@ -5,14 +5,15 @@ import { requireRole } from "@/lib/rbac";
 const prisma = new PrismaClient();
 
 // PATCH /api/timetable/[id] — Admin + Coordinator + HOD + Faculty
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireRole(["ADMIN", "COORDINATOR", "HOD", "FACULTY"]);
   if (error) return error;
 
+  const { id } = await params;
   const body = await request.json();
   try {
     const updated = await prisma.timetable.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(body.room !== undefined && { room: body.room }),
         ...(body.startTime && { startTime: body.startTime }),
@@ -28,12 +29,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 // DELETE /api/timetable/[id] — Admin + Coordinator + HOD
-export async function DELETE(_: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_: Request, { params }: { params: Promise<{ id: string }> }) {
   const { error } = await requireRole(["ADMIN", "COORDINATOR", "HOD"]);
   if (error) return error;
 
+  const { id } = await params;
   try {
-    await prisma.timetable.delete({ where: { id: params.id } });
+    await prisma.timetable.delete({ where: { id } });
     return NextResponse.json({ message: "Timetable slot deleted." });
   } catch {
     return NextResponse.json({ error: "Failed to delete timetable slot." }, { status: 500 });
