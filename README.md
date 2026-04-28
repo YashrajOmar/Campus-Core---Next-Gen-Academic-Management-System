@@ -193,13 +193,7 @@ The mobile app will use the same backend APIs as the web platform.
 
 Contributions are welcome. Please open an issue before making major changes.
 
----
 
-## 📄 License
-
-MIT License
-
----
 
 ## 👨‍💻 Author
 
