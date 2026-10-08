@@ -1,200 +1,86 @@
-# 🎓 Campus Core – Academic Management System
+# 🎓 CampusCore - Next-Gen Academic Management System
 
-A full-stack **College Academic Management System** designed to streamline academic workflows such as attendance tracking, marks management, exam scheduling, and communication between students, faculty, and parents.
+![CampusCore Banner](https://img.shields.io/badge/CampusCore-Next--Gen_Management-blue?style=for-the-badge&logo=next.js)
 
----
+CampusCore is a comprehensive, full-stack Academic Management System designed to streamline university operations. It provides role-based dashboards, academic tracking, timetable management, and automated workflows for students, faculty, and administrators.
 
-## 🚀 Live Demo
+## 🚀 Features
 
-🌐 https://campus-core-theta.vercel.app
+- **Role-Based Access Control (RBAC):** Secure, specialized dashboards for Admins, HODs, Coordinators, Faculty, Students, and Parents.
+- **Academic Management:** End-to-end management of Courses, Enrollments, and Timetables.
+- **Attendance & Grading:** Real-time attendance tracking and marks management with draft/publish workflows.
+- **Automated Workflows:** Multi-tier appeal system for grade reviews (Student -> Faculty -> Coordinator -> HOD).
+- **Communication:** Interactive notice boards and parent-teacher meeting requests.
+- **Mobile Ready:** Designed with a responsive, glassmorphic UI and encapsulated as a native Android app using Capacitor.
 
----
+## 🛠️ Tech Stack
 
-## ✨ Features
+- **Frontend:** [Next.js 15](https://nextjs.org/) (App Router), React 19, Tailwind CSS, Framer Motion
+- **Backend:** Node.js, Next.js API Routes (Serverless)
+- **Database:** PostgreSQL (hosted on [Neon](https://neon.tech/)), [Prisma ORM](https://www.prisma.io/)
+- **Authentication:** [NextAuth.js](https://next-auth.js.org/) with secure credential-based login and OTP verification via Resend.
+- **Mobile:** [Capacitor](https://capacitorjs.com/) for native Android deployment
+- **Testing:** Vitest, React Testing Library
 
-### 👨‍🎓 Student
+## 📋 Architecture & Security
 
-* View attendance and internal marks
-* Raise appeals for marks
-* Access timetable and notices
-* Request academic support
+- **Strict Type Safety:** Fully typed with TypeScript, using Zod for robust API request validation.
+- **Security:** Passwords hashed with `bcryptjs`, protected API routes, and environment variable isolation.
+- **Optimized Performance:** Leverages Next.js server components, Turbopack, and connection pooling via Prisma Accelerate.
 
-### 👩‍🏫 Faculty
+## 💻 Running Locally
 
-* Upload marks and attendance
-* Respond to student appeals
-* Manage course-related data
+### Prerequisites
+- Node.js 18+
+- PostgreSQL database (or Neon connection string)
 
-### 🏫 Admin / HOD
+### Setup
 
-* Approve and manage appeals
-* Configure academic workflows
-* Monitor system activity
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YashrajOmar/Campus-Core---Next-Gen-Academic-Management-System.git
+   cd Campus-Core---Next-Gen-Academic-Management-System/web
+   ```
 
-### 👨‍👩‍👧 Parent
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-* Track student performance
-* Request meetings with faculty
+3. **Configure Environment Variables:**
+   Create a `.env` file in the `web` directory:
+   ```env
+   DATABASE_URL="your_postgresql_connection_string"
+   NEXTAUTH_SECRET="your_secure_random_string"
+   NEXTAUTH_URL="http://localhost:3000"
+   RESEND_API_KEY="your_resend_api_key"
+   ```
 
----
+4. **Initialize the Database:**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   npm run seed  # Populates initial admin, faculty, and student accounts
+   ```
 
-## 🏗️ Tech Stack
+5. **Start the Development Server:**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-**Frontend**
+## 📱 Android App (Capacitor)
 
-* Next.js 16 (App Router)
-* Tailwind CSS
-
-**Backend**
-
-* Next.js API Routes
-* Prisma ORM
-
-**Database**
-
-* PostgreSQL
-
-**Authentication**
-
-* NextAuth.js
-
-**Deployment**
-
-* Vercel
-
----
-
-## 🧠 System Architecture
-
-The system follows a **client-server architecture**:
-
-* Web Application (Next.js frontend)
-* Backend API (Next.js server routes)
-* Prisma ORM (database access layer)
-* PostgreSQL database
-
-All business logic is handled via APIs, ensuring scalability and separation of concerns.
-
----
-
-## 📦 Installation & Setup
-
-### 1. Clone the repository
+The platform is wrapped into a native Android APK using Capacitor, seamlessly rendering the live Next.js production build for a native mobile experience.
 
 ```bash
-git clone https://github.com/your-username/campus-core.git
-cd campus-core
+npx cap sync android
+npx cap open android
 ```
-
-### 2. Install dependencies
-
-```bash
-npm install
-```
-
-### 3. Setup environment variables
-
-Create a `.env` file:
-
-```env
-DATABASE_URL=your_postgres_connection_string
-NEXTAUTH_SECRET=your_secret
-NEXTAUTH_URL=http://localhost:3000
-```
-
----
-
-### 4. Run development server
-
-```bash
-npm run dev
-```
-
----
-
-## 🏗️ Build for Production
-
-```bash
-npm run build
-npm start
-```
-
----
-
-## 🚀 Deployment (Vercel)
-
-1. Push code to GitHub
-
-2. Import project in Vercel
-
-3. Add environment variables:
-
-   * `DATABASE_URL`
-   * `NEXTAUTH_SECRET`
-   * `NEXTAUTH_URL`
-
-4. Deploy 🎉
-
----
-
-## 📱 Mobile App (Planned)
-
-A mobile version of the platform is planned using **Capacitor**.
-
-### Status
-
-🚧 Under Development
-
-### Planned Features
-
-* Android app using WebView
-* Secure authentication handling
-* Push notifications (marks, attendance, notices)
-* Limited offline support
-
-The mobile app will use the same backend APIs as the web platform.
-
----
-
-## 📊 Core Modules
-
-* Attendance Management
-* Internal Marks Management
-* Appeals Workflow
-* Notices & Announcements
-* Exam Scheduling
-* Parent Portal
-
----
-
-## 🔐 Validation Rules
-
-* Only authorized users can modify academic data
-* Marks editable only during review period
-* Appeals allowed within defined timeframe
-* Attendance linked to scheduled lectures
-
----
-
-## 🔮 Future Enhancements
-
-* 📊 Analytics dashboards (performance & attendance insights)
-* 🤖 AI-based student performance prediction
-* 🔔 Real-time notifications (push, email, SMS)
-* 🏫 Integration with university ERP systems
-* 📱 Full native mobile apps (Android & iOS)
-* 📈 Advanced reporting (PDF/Excel export)
-* 🔐 Enhanced security & audit logs
-* 🌐 Scalability improvements (microservices, caching)
-
----
 
 ## 🤝 Contributing
 
-Contributions are welcome. Please open an issue before making major changes.
+Contributions are welcome! Please fork the repository and submit a pull request for any enhancements or bug fixes.
 
-
-
-## 👨‍💻 Author
-
-**Yashraj Omar**
+---
+*Built with ❤️ for modern education.*

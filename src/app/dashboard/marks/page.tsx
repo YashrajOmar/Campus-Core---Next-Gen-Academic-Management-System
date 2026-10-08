@@ -58,8 +58,8 @@ export default function MarksPage() {
       .filter((e: any) => e.courseId === courseId)
       .map((e: any) => ({
         id: e.student.id,
-        enrollmentNumber: e.student.user?.email || "N/A",
-        user: { name: e.student.user?.name || e.student.user?.email || "Unknown" }
+        enrollmentNumber: e.student.enrollmentNumber || "N/A",
+        user: { name: e.student.user?.name || "Unknown" }
       }));
     setStudents(enrolled);
   }
@@ -146,7 +146,7 @@ export default function MarksPage() {
                 {marks.map(m => (
                   <tr key={m.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td className="py-4 font-medium text-white">{m.course?.courseCode || "-"}</td>
-                    {canUpload && <td className="py-4 text-foreground/80">{m.student?.user?.name || m.student?.user?.email || m.studentId}</td>}
+                    {canUpload && <td className="py-4 text-foreground/80">{m.student?.user?.name || m.studentId}</td>}
                     <td className="py-4 text-foreground/80">{m.topic || "General"}</td>
                     <td className="py-4 text-foreground/80">{m.status === "DRAFT" ? "--" : m.marksObtained}</td>
                     <td className="py-4 text-foreground/80">{m.totalMarks}</td>

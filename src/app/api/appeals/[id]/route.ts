@@ -13,7 +13,6 @@ export async function PATCH(
   const { user, error } = await requireAuth();
   if (error) return error;
 
-  const id = params.id;
   const body = await request.json();
   const { status, escalate } = body;
 

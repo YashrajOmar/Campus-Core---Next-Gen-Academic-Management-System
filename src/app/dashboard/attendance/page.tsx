@@ -5,7 +5,7 @@ import { Modal, ModalTitle, ModalError, ModalField, ModalRow, ModalHalf, ModalIn
 
 type Attendance = { id:string; studentId:string; courseId:string; date:string; status:string; student:{ user:{ name:string } }; course:{ courseCode:string; courseName:string }; };
 type Course = { id:string; courseCode:string; courseName:string; };
-type Student = { id:string; user:{ name:string; email:string }; };
+type Student = { id:string; user:{ name:string; email?:string }; };
 
 export default function AttendancePage() {
   const { data: session } = useSession();
@@ -49,7 +49,7 @@ export default function AttendancePage() {
       .filter((e: any) => e.courseId === courseId)
       .map((e: any) => ({
         id: e.student.id,
-        user: { name: e.student.user?.name || e.student.user?.email || "Unknown", email: e.student.user?.email || "" }
+        user: { name: e.student.user?.name || "Unknown" }
       }));
     setStudents(enrolled);
   }
