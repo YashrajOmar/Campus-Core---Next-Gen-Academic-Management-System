@@ -31,8 +31,8 @@ export default function TimetablePage() {
     setLoading(true);
     try {
       const [sr, cr] = await Promise.all([fetch("/api/timetable"), fetch("/api/courses")]);
-      setSlots(await sr.json());
-      setCourses(await cr.json());
+      if (sr.ok) setSlots(await sr.json());
+      if (cr.ok) setCourses(await cr.json());
     } catch (e:any) { setErr(e.message); } finally { setLoading(false); }
   }
 
