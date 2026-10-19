@@ -31,7 +31,7 @@ export default function AppealsPage() {
   useEffect(() => {
     fetchAppeals();
     if (userRole === "STUDENT") {
-      fetch("/api/marks").then(r => r.json()).then(data => setMarks(data)).catch(()=>{});
+      fetch("/api/marks").then(r => {if(r.ok) return r.json(); throw new Error();}).then(data => setMarks(data)).catch(()=>{});
     }
   }, [userRole]);
 

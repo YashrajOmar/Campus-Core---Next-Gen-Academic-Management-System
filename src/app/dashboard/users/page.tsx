@@ -88,7 +88,7 @@ export default function UsersPage() {
 
   function openLinkModal(u: User) {
     setLinkingParent(u); setShowLinkModal(true); setLinkErr("");
-    if(allStudents.length===0) fetch("/api/users?role=STUDENT").then(r=>r.json()).then(setAllStudents).catch(()=>{});
+    if(allStudents.length===0) fetch("/api/users?role=STUDENT").then(r=>{if(r.ok) return r.json(); throw new Error();}).then(setAllStudents).catch(()=>{});
   }
 
   async function submitLink(e: React.FormEvent) {
